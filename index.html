@@ -15,11 +15,10 @@
     .header-bg { background: linear-gradient(135deg, #1A4B84 0%, #3498DB 100%); padding: 35px 20px 25px; border-radius: 0 0 25px 25px; color: white; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
     .profile-img { width: 90px; height: 90px; border-radius: 50%; border: 4px solid white; object-fit: cover; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
     .card-custom { background: white; border-radius: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); border: none; overflow: hidden; margin-bottom: 15px; }
-    .btn-main { background-color: #3498DB; color: white; border-radius: 20px; font-weight: 500; border: none; transition: 0.3s; }
+    .btn-main { background-color: #3498DB; color: white; border: none; transition: 0.3s; }
     .btn-main:hover { background-color: #2980B9; color: white; }
-    .btn-evaluate { background-color: #F39C12; color: white; border-radius: 20px; font-weight: 500; border: none; transition: 0.3s; }
+    .btn-evaluate { background-color: #F39C12; color: white; border: none; transition: 0.3s; }
     .btn-evaluate:hover { background-color: #D68910; color: white; }
-    .pet-card { border-left: 5px solid #3498DB; background-color: white; border-radius: 10px; padding: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
     #loading { margin-top: 35vh; }
   </style>
 </head>
@@ -37,16 +36,20 @@
       <div class="header-bg text-center">
         <img id="userImg" src="https://via.placeholder.com/90" class="profile-img mb-2" alt="Profile">
         <h5 class="fw-bold mb-1">คุณ <span id="welcomeName"></span></h5>
-        <!-- เพิ่มส่วนแสดงที่อยู่กลับมาแล้วครับ -->
         <div class="small text-light opacity-75 mt-2 text-start px-3" style="font-size: 13px;">
           <i class="fa-solid fa-location-dot"></i> <b>ที่อยู่:</b> <span id="welcomeAddress"></span>
         </div>
       </div>
 
       <div class="container mt-4 pb-5">
+        <div id="surveyAlert" class="alert alert-success d-flex justify-content-between align-items-center mb-4 shadow-sm" style="display: none !important; border-radius: 15px;">
+          <div><i class="fa-solid fa-bell text-success"></i> คุณมีบริการที่รอประเมินผล!</div>
+          <button class="btn btn-sm btn-success rounded-pill" onclick="showSurveyForm()">ประเมินรับบริการ</button>
+        </div>
+
         <div class="d-flex justify-content-between align-items-center mb-3">
           <h5 class="fw-bold mb-0" style="color: #1A4B84;"><i class="fa-solid fa-paw"></i> สัตว์เลี้ยงของคุณ</h5>
-          <button class="btn btn-sm btn-outline-primary rounded-pill" onclick="showAddPetForm()"><i class="fa-solid fa-plus"></i> เพิ่มตัวใหม่</button>
+          <button class="btn btn-sm btn-outline-primary rounded-pill shadow-sm" onclick="showAddPetForm()"><i class="fa-solid fa-plus"></i> เพิ่มตัวใหม่</button>
         </div>
         
         <!-- รายการสัตว์เลี้ยงจะโชว์ตรงนี้ -->
@@ -86,8 +89,8 @@
               <option value="อาคารสัตวแพทย์ เทศบาลเมืองสีคิ้ว">อาคารสัตวแพทย์ เทศบาลเมืองสีคิ้ว</option>
             </select>
           </div>
-          <button type="submit" class="btn btn-main w-100 mt-2" id="btnBook">ยืนยันนัดหมาย</button>
-          <button type="button" class="btn btn-light w-100 mt-2 rounded-pill" onclick="goHome()">ย้อนกลับ</button>
+          <button type="submit" class="btn btn-main w-100 mt-2 rounded-pill py-2" id="btnBook">ยืนยันนัดหมาย</button>
+          <button type="button" class="btn btn-light w-100 mt-2 rounded-pill py-2 shadow-sm" onclick="goHome()">ย้อนกลับ</button>
         </form>
       </div>
     </div>
@@ -102,24 +105,37 @@
           <input type="hidden" id="surveyApptId">
           <p class="fw-bold text-primary mb-2 mt-2" style="font-size:14px;">กรุณาให้คะแนน (5=ดีมาก, 1=ควรปรับปรุง)</p>
           
-          <div class="mb-3"><label class="form-label small">1. ความสะดวกในการใช้งานระบบ (จองคิว)</label><select class="form-select" id="q1" required><option value="5" selected>5 - ดีมาก</option><option value="4">4 - ดี</option><option value="3">3 - ปานกลาง</option><option value="2">2 - พอใช้</option><option value="1">1 - ควรปรับปรุง</option></select></div>
+          <div class="mb-3"><label class="form-label small">1. ความสะดวกในการใช้งานระบบ</label><select class="form-select" id="q1" required><option value="5" selected>5 - ดีมาก</option><option value="4">4 - ดี</option><option value="3">3 - ปานกลาง</option><option value="2">2 - พอใช้</option><option value="1">1 - ควรปรับปรุง</option></select></div>
           <div class="mb-3"><label class="form-label small">2. ความรวดเร็วในการให้บริการ</label><select class="form-select" id="q2" required><option value="5" selected>5 - ดีมาก</option><option value="4">4 - ดี</option><option value="3">3 - ปานกลาง</option><option value="2">2 - พอใช้</option><option value="1">1 - ควรปรับปรุง</option></select></div>
-          <div class="mb-3"><label class="form-label small">3. ความชัดเจนของข้อมูลและขั้นตอน</label><select class="form-select" id="q3" required><option value="5" selected>5 - ดีมาก</option><option value="4">4 - ดี</option><option value="3">3 - ปานกลาง</option><option value="2">2 - พอใช้</option><option value="1">1 - ควรปรับปรุง</option></select></div>
-          <div class="mb-3"><label class="form-label small">4. ความสุภาพและการบริการของเจ้าหน้าที่</label><select class="form-select" id="q4" required><option value="5" selected>5 - ดีมาก</option><option value="4">4 - ดี</option><option value="3">3 - ปานกลาง</option><option value="2">2 - พอใช้</option><option value="1">1 - ควรปรับปรุง</option></select></div>
-          <div class="mb-3"><label class="form-label small">5. ความพึงพอใจโดยรวมต่อการให้บริการ</label><select class="form-select" id="q5" required><option value="5" selected>5 - ดีมาก</option><option value="4">4 - ดี</option><option value="3">3 - ปานกลาง</option><option value="2">2 - พอใช้</option><option value="1">1 - ควรปรับปรุง</option></select></div>
+          <div class="mb-3"><label class="form-label small">3. ความชัดเจนของข้อมูล/ขั้นตอน</label><select class="form-select" id="q3" required><option value="5" selected>5 - ดีมาก</option><option value="4">4 - ดี</option><option value="3">3 - ปานกลาง</option><option value="2">2 - พอใช้</option><option value="1">1 - ควรปรับปรุง</option></select></div>
+          <div class="mb-3"><label class="form-label small">4. ความสุภาพและการบริการ</label><select class="form-select" id="q4" required><option value="5" selected>5 - ดีมาก</option><option value="4">4 - ดี</option><option value="3">3 - ปานกลาง</option><option value="2">2 - พอใช้</option><option value="1">1 - ควรปรับปรุง</option></select></div>
+          <div class="mb-3"><label class="form-label small">5. ความพึงพอใจโดยรวม</label><select class="form-select" id="q5" required><option value="5" selected>5 - ดีมาก</option><option value="4">4 - ดี</option><option value="3">3 - ปานกลาง</option><option value="2">2 - พอใช้</option><option value="1">1 - ควรปรับปรุง</option></select></div>
           
           <div class="mb-3 mt-4">
             <label class="form-label fw-bold small">6. ข้อเสนอแนะเพิ่มเติม</label>
             <textarea class="form-control" id="surveyFeedback" rows="3" placeholder="พิมพ์ข้อเสนอแนะ..."></textarea>
           </div>
 
-          <button type="submit" class="btn btn-evaluate w-100 mt-2" id="btnSubmitSurvey"><i class="fa-solid fa-paper-plane"></i> ส่งแบบประเมิน & เสร็จสิ้น</button>
-          <button type="button" class="btn btn-light w-100 mt-2 rounded-pill" onclick="goHome()">ย้อนกลับ</button>
+          <button type="submit" class="btn btn-evaluate w-100 mt-2 rounded-pill py-2" id="btnSubmitSurvey"><i class="fa-solid fa-paper-plane"></i> ส่งประเมิน & เสร็จสิ้น</button>
+          <button type="button" class="btn btn-light w-100 mt-2 rounded-pill py-2 shadow-sm" onclick="goHome()">ย้อนกลับ</button>
         </form>
       </div>
     </div>
 
-    <!-- ================= 4. ฟอร์มเพิ่มสัตว์เลี้ยง ================= -->
+    <!-- ================= 4. ประวัติรับบริการ (History) ================= -->
+    <div id="historyBox" class="container mt-4 mb-5" style="display: none;">
+      <div class="card card-custom p-4">
+        <h5 class="fw-bold text-center mb-1" style="color: #1A4B84;"><i class="fa-solid fa-clock-rotate-left"></i> ประวัติรับบริการ</h5>
+        <p class="text-center text-muted small mb-4">ของ <span id="historyPetNameText" class="fw-bold text-dark"></span></p>
+
+        <div id="historyListContainer" class="mb-3">
+          <!-- รายการประวัติจะโหลดมาใส่ตรงนี้ -->
+        </div>
+        <button type="button" class="btn btn-light w-100 mt-2 rounded-pill py-2 shadow-sm" onclick="goHome()">ย้อนกลับ</button>
+      </div>
+    </div>
+
+    <!-- ================= 5. ฟอร์มเพิ่มสัตว์เลี้ยง ================= -->
     <div id="addPetBox" class="container mt-4" style="display: none;">
       <div class="card card-custom p-4">
         <h5 class="fw-bold text-center mb-4" style="color: #1A4B84;"><i class="fa-solid fa-plus-circle"></i> เพิ่มสัตว์เลี้ยงใหม่</h5>
@@ -127,15 +143,14 @@
           <div class="mb-2"><input type="text" class="form-control" id="newPetName" placeholder="ชื่อสัตว์เลี้ยง *" required></div>
           <div class="mb-2"><select class="form-select" id="newPetType" required><option value="" disabled selected>-- ชนิดสัตว์เลี้ยง * --</option><option value="สุนัข">สุนัข</option><option value="แมว">แมว</option><option value="กระต่าย">กระต่าย</option><option value="อื่นๆ">อื่นๆ</option></select></div>
           <div class="mb-3"><input type="text" class="form-control" id="newPetAge" placeholder="อายุ (ตัวอย่าง: 2 ปี)"></div>
-          <button type="submit" class="btn btn-main w-100 mt-2" id="btnAddPet">บันทึกข้อมูล</button>
-          <button type="button" class="btn btn-light w-100 mt-2 rounded-pill" onclick="goHome()">ย้อนกลับ</button>
+          <button type="submit" class="btn btn-main w-100 mt-2 rounded-pill py-2" id="btnAddPet">บันทึกข้อมูล</button>
+          <button type="button" class="btn btn-light w-100 mt-2 rounded-pill py-2 shadow-sm" onclick="goHome()">ย้อนกลับ</button>
         </form>
       </div>
     </div>
 
-    <!-- ================= 5. หน้าลงทะเบียนแรกเข้า ================= -->
+    <!-- ================= 6. หน้าลงทะเบียนแรกเข้า ================= -->
     <div id="registerBox" class="container mt-4 mb-5" style="display: none;">
-      <!-- โค้ดลงทะเบียนแรกเข้า (เหมือนเดิม) -->
       <div class="card card-custom p-4">
         <h4 class="text-center mb-4 fw-bold" style="color: #1A4B84;">ลงทะเบียนใช้งาน</h4>
         <form id="registerForm">
@@ -159,7 +174,7 @@
           <div class="mb-2"><input type="text" class="form-control" id="petName" placeholder="ชื่อสัตว์เลี้ยง *" required></div>
           <div class="mb-2"><select class="form-select" id="petType" required><option value="" disabled selected>-- ชนิด * --</option><option value="สุนัข">สุนัข</option><option value="แมว">แมว</option><option value="อื่นๆ">อื่นๆ</option></select></div>
           <div class="mb-3"><input type="text" class="form-control" id="petAge" placeholder="อายุ"></div>
-          <button type="submit" class="btn btn-main w-100 mt-2" id="btnRegister">บันทึกข้อมูล</button>
+          <button type="submit" class="btn btn-main w-100 mt-2 rounded-pill py-2" id="btnRegister">บันทึกข้อมูล</button>
         </form>
       </div>
     </div>
@@ -177,7 +192,7 @@
     function isAppointmentReady(dateStr) {
       if (!dateStr) return false;
       let apptDate = new Date(dateStr);
-      // กรณีวันที่จาก Google Sheet มีรูปแบบประหลาด
+      // กรณีวันที่จาก Google Sheet มาเป็นแบบ Text
       if (isNaN(apptDate)) {
         const parts = dateStr.toString().replace(/'/g, '').split(' ')[0].split('/');
         if (parts.length === 3) apptDate = new Date(parts[2], parts[1]-1, parts[0]);
@@ -214,11 +229,11 @@
         if (data.status === "found") {
           document.getElementById("welcomeBox").style.display = "block";
           document.getElementById("welcomeName").innerText = data.name;
-          document.getElementById("welcomeAddress").innerText = data.address; // ใส่ข้อมูลที่อยู่
+          document.getElementById("welcomeAddress").innerText = data.address || "-";
           pendingApptsGlobal = data.pendingAppts || [];
           
           const petList = document.getElementById("petListContainer");
-          petList.innerHTML = ""; // ล้างค่าเดิม
+          petList.innerHTML = ""; 
 
           if(data.pets && data.pets.length > 0) {
             data.pets.forEach(pet => {
@@ -226,27 +241,37 @@
               const petAppt = pendingApptsGlobal.find(a => a.petName === pet.petName);
               
               // 2. ลอจิกปุ่มประเมิน
-              let evaluateBtnHtml = `<button class="btn btn-sm btn-secondary px-2 rounded-pill" disabled style="opacity:0.5;">ประเมิน</button>`;
+              let evaluateBtnHtml = `<button class="btn btn-sm w-100 rounded-pill shadow-sm py-2" disabled style="background-color: #BDC3C7; color: white;"><i class="fa-solid fa-star"></i> ประเมิน</button>`;
               
               if (petAppt) {
-                // ถ้ามีคิว เช็กว่า "ถึงวันนัดหรือเลยวันนัดมาหรือยัง"
+                // ถ้ามีคิว เช็กว่าถึงวันนัดหรือยัง
                 if (isAppointmentReady(petAppt.date)) {
-                  // ถ้าถึงแล้ว เปิดปุ่มให้กดได้และเปลี่ยนเป็นสีส้ม
-                  evaluateBtnHtml = `<button class="btn btn-sm btn-evaluate px-2 rounded-pill shadow-sm" onclick="showSurveyForm('${petAppt.apptId}', '${pet.petName}')"><i class="fa-solid fa-star"></i> ประเมิน</button>`;
+                  // ถึงวันนัดแล้ว -> ขึ้นสีส้มให้กดได้
+                  evaluateBtnHtml = `<button class="btn btn-sm btn-evaluate w-100 rounded-pill shadow-sm py-2" onclick="showSurveyForm('${petAppt.apptId}', '${pet.petName}')"><i class="fa-solid fa-star"></i> ประเมิน</button>`;
                 } else {
-                  // ถ้ายังไม่ถึงวันนัด ให้โชว์ปุ่มเทาๆ แต่กดดูแจ้งเตือนได้
-                  evaluateBtnHtml = `<button class="btn btn-sm btn-secondary px-2 rounded-pill" onclick="Swal.fire('ยังไม่ถึงคิว', 'สามารถประเมินได้เมื่อถึงวันที่นัดหมายครับ', 'info')">ประเมิน</button>`;
+                  // ยังไม่ถึงวันนัด -> เป็นสีเทากดเพื่อดูแจ้งเตือน
+                  evaluateBtnHtml = `<button class="btn btn-sm w-100 rounded-pill shadow-sm py-2" style="background-color: #95A5A6; color: white;" onclick="Swal.fire('ยังไม่ถึงคิว', 'สามารถประเมินได้เมื่อถึงวันที่นัดหมายครับ', 'info')"><i class="fa-solid fa-star"></i> ประเมิน</button>`;
                 }
               }
 
-              // 3. วาดการ์ดสัตว์เลี้ยง
+              // 3. วาดการ์ด Layout ใหม่ (นัดหมาย/ประเมิน อยู่ซ้าย, ประวัติ อยู่ขวา)
               petList.innerHTML += `
-                <div class="pet-card mb-3">
-                  <h6 class="fw-bold mb-1">${pet.petName} <span class="badge bg-light text-dark fw-normal border">ชนิด: ${pet.petType}</span></h6>
-                  <div class="mt-2 d-flex gap-1">
-                    <button class="btn btn-sm btn-main px-2 rounded-pill" onclick="showBookingForm('${pet.petId}', '${pet.petName}')">นัดหมาย</button>
-                    ${evaluateBtnHtml}
-                    <button class="btn btn-sm btn-secondary px-2 rounded-pill" onclick="showHistoryAlert()">ประวัติ</button>
+                <div class="pet-card mb-3 p-3 bg-white shadow-sm border-0 border-start border-4" style="border-color: #3498DB !important; border-radius: 12px;">
+                  <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-3">
+                      <h6 class="fw-bold mb-0 text-dark" style="font-size: 1.1rem;">${pet.petName}</h6>
+                      <span class="badge bg-light text-primary border border-primary-subtle rounded-pill px-3 py-1">ชนิด: ${pet.petType}</span>
+                  </div>
+                  
+                  <div class="row g-2">
+                    <!-- คอลัมน์ซ้าย: นัดหมาย + ประเมิน -->
+                    <div class="col-6 d-flex flex-column gap-2">
+                      <button class="btn btn-sm btn-main w-100 rounded-pill shadow-sm py-2" onclick="showBookingForm('${pet.petId}', '${pet.petName}')"><i class="fa-solid fa-calendar-plus"></i> นัดหมาย</button>
+                      ${evaluateBtnHtml}
+                    </div>
+                    <!-- คอลัมน์ขวา: ประวัติ (ชิดขวาล่าง) -->
+                    <div class="col-6 d-flex flex-column justify-content-end">
+                      <button class="btn btn-sm btn-outline-secondary w-100 rounded-pill shadow-sm py-2" onclick="showHistory('${pet.petName}')"><i class="fa-solid fa-clock-rotate-left"></i> ประวัติ</button>
+                    </div>
                   </div>
                 </div>
               `;
@@ -267,6 +292,7 @@
       document.getElementById("bookingBox").style.display = "none";
       document.getElementById("surveyBox").style.display = "none";
       document.getElementById("addPetBox").style.display = "none";
+      document.getElementById("historyBox").style.display = "none";
       document.getElementById("welcomeBox").style.display = "block";
     }
 
@@ -292,18 +318,55 @@
       document.getElementById("addPetBox").style.display = "block";
     }
 
-    function showHistoryAlert() {
-      Swal.fire('ประวัติ', 'ฟีเจอร์นี้อยู่ระหว่างการพัฒนาครับ', 'info');
+    // โหลดประวัติของสัตว์เลี้ยง
+    async function showHistory(petName) {
+      goHome();
+      document.getElementById("welcomeBox").style.display = "none";
+      document.getElementById("historyBox").style.display = "block";
+      document.getElementById("historyPetNameText").innerText = petName;
+      document.getElementById("historyListContainer").innerHTML = `<div class="text-center py-4"><div class="spinner-border text-primary mb-2" role="status"></div><br><small class="text-muted">กำลังโหลดประวัติ...</small></div>`;
+
+      try {
+        const res = await fetch(API_URL, {
+           method: "POST",
+           body: JSON.stringify({ action: "getHistory" }),
+           headers: { "Content-Type": "text/plain;charset=utf-8" },
+           redirect: "follow"
+        });
+        const result = await res.json();
+        if(result.status === "success") {
+           // กรองเอาเฉพาะประวัติของสัตว์เลี้ยงตัวที่กด
+           const myHist = result.history.filter(h => h.petName === petName);
+           let html = "";
+           
+           if(myHist.length === 0) {
+             html = `<div class="text-center py-4 text-muted bg-light rounded-3 mt-3"><i class="fa-solid fa-folder-open fs-1 mb-2 opacity-25"></i><br>ยังไม่มีประวัติการรับบริการ</div>`;
+           } else {
+             myHist.forEach(h => {
+                html += `
+                <div class="p-3 mb-2 bg-white rounded-3 border shadow-sm" style="border-left: 4px solid #2ECC71 !important;">
+                   <div class="fw-bold text-dark mb-1"><i class="fa-solid fa-stethoscope text-success me-2"></i> ${h.serviceType}</div>
+                   <div class="small text-muted"><i class="fa-solid fa-calendar-check me-2"></i> วันที่รับบริการ: ${h.dateDone}</div>
+                </div>`;
+             });
+           }
+           document.getElementById("historyListContainer").innerHTML = html;
+        } else {
+           document.getElementById("historyListContainer").innerHTML = `<div class="text-center text-danger py-3">ไม่สามารถโหลดข้อมูลได้</div>`;
+        }
+      } catch(err) {
+         document.getElementById("historyListContainer").innerHTML = `<div class="text-center text-danger py-3">เกิดข้อผิดพลาดในการเชื่อมต่อ</div>`;
+      }
     }
 
     // -----------------------------------------------------------
     // ฟังก์ชันส่งข้อมูลไปยัง Google Sheet
     // -----------------------------------------------------------
     
-    // 1. ส่งผลประเมิน (กดแล้วตัดคิวให้เลย)
+    // 1. ส่งผลประเมิน
     document.getElementById("surveyForm").addEventListener("submit", async function(e) {
       e.preventDefault();
-      document.getElementById("btnSubmitSurvey").innerHTML = "กำลังส่งข้อมูล...";
+      document.getElementById("btnSubmitSurvey").innerHTML = `<span class="spinner-border spinner-border-sm"></span> กำลังส่งข้อมูล...`;
       
       const formData = {
         action: "submitSurvey", 
@@ -318,7 +381,7 @@
       };
       
       try {
-        const res = await fetch(API_URL, { method: "POST", body: JSON.stringify(formData), headers: { "Content-Type": "text/plain;charset=utf-8" } });
+        const res = await fetch(API_URL, { method: "POST", body: JSON.stringify(formData), headers: { "Content-Type": "text/plain;charset=utf-8" }, redirect: "follow" });
         const result = await res.json();
         if (result.status === "success") {
           Swal.fire({ title: 'ขอบคุณครับ!', text: 'บันทึกประวัติการรับบริการเสร็จสิ้นแล้ว', icon: 'success' }).then(() => window.location.reload());
@@ -329,16 +392,16 @@
     // 2. ส่งข้อมูลจองคิว
     document.getElementById("bookingForm").addEventListener("submit", async function(e) {
       e.preventDefault();
-      document.getElementById("btnBook").innerHTML = "กำลังบันทึก...";
+      document.getElementById("btnBook").innerHTML = `<span class="spinner-border spinner-border-sm"></span> กำลังบันทึก...`;
       const formData = {
         action: "book", lineId: currentLineId, petId: document.getElementById("bookPetId").value,
         date: document.getElementById("bookDate").value, location: document.getElementById("bookLocation").value, serviceType: document.getElementById("bookServiceType").value
       };
       try {
-        const res = await fetch(API_URL, { method: "POST", body: JSON.stringify(formData), headers: { "Content-Type": "text/plain;charset=utf-8" } });
+        const res = await fetch(API_URL, { method: "POST", body: JSON.stringify(formData), headers: { "Content-Type": "text/plain;charset=utf-8" }, redirect: "follow" });
         const result = await res.json();
         if (result.status === "success") {
-           Swal.fire({ title: 'จองคิวสำเร็จ!', html: `คิวที่ <b style="color:#3498DB; font-size:20px;">${result.queueNo}</b><br>โปรดมารับบริการตามนัดหมาย`, icon: 'success' }).then(() => window.location.reload());
+           Swal.fire({ title: 'นัดหมายสำเร็จ!', html: `คิวของคุณคือ <b style="color:#3498DB; font-size:24px;">${result.queueNo}</b><br>โปรดมารับบริการตามนัดหมาย`, icon: 'success' }).then(() => window.location.reload());
         }
       } catch (err) { Swal.fire('Error', 'เชื่อมต่อขัดข้อง', 'error'); }
     });
@@ -346,7 +409,7 @@
     // 3. ลงทะเบียนแรกเข้า (รวบที่อยู่)
     document.getElementById("registerForm").addEventListener("submit", async function(e) {
       e.preventDefault();
-      document.getElementById("btnRegister").innerHTML = "กำลังบันทึก...";
+      document.getElementById("btnRegister").innerHTML = `<span class="spinner-border spinner-border-sm"></span> กำลังบันทึก...`;
       const fullName = document.getElementById("ownerPrefix").value + document.getElementById("ownerName").value;
       const fullAddress = document.getElementById("addressNo").value + " ต." + document.getElementById("subdistrict").value + " อ." + document.getElementById("district").value + " จ." + document.getElementById("province").value + " " + document.getElementById("zipcode").value;
       const formData = {
@@ -355,7 +418,7 @@
         petName: document.getElementById("petName").value, petType: document.getElementById("petType").value, petAge: document.getElementById("petAge").value
       };
       try {
-        const res = await fetch(API_URL, { method: "POST", body: JSON.stringify(formData), headers: { "Content-Type": "text/plain;charset=utf-8" } });
+        const res = await fetch(API_URL, { method: "POST", body: JSON.stringify(formData), headers: { "Content-Type": "text/plain;charset=utf-8" }, redirect: "follow" });
         const result = await res.json();
         if (result.status === "success") Swal.fire('สำเร็จ!', 'ลงทะเบียนเรียบร้อย', 'success').then(() => window.location.reload());
       } catch (err) { Swal.fire('Error', 'เชื่อมต่อขัดข้อง', 'error'); }
@@ -364,13 +427,13 @@
     // 4. เพิ่มสัตว์เลี้ยงตัวใหม่
     document.getElementById("addPetForm").addEventListener("submit", async function(e) {
       e.preventDefault();
-      document.getElementById("btnAddPet").innerHTML = "กำลังบันทึก...";
+      document.getElementById("btnAddPet").innerHTML = `<span class="spinner-border spinner-border-sm"></span> กำลังบันทึก...`;
       const formData = {
         action: "addPet", lineId: currentLineId,
         petName: document.getElementById("newPetName").value, petType: document.getElementById("newPetType").value, petAge: document.getElementById("newPetAge").value
       };
       try {
-        const res = await fetch(API_URL, { method: "POST", body: JSON.stringify(formData), headers: { "Content-Type": "text/plain;charset=utf-8" } });
+        const res = await fetch(API_URL, { method: "POST", body: JSON.stringify(formData), headers: { "Content-Type": "text/plain;charset=utf-8" }, redirect: "follow" });
         const result = await res.json();
         if (result.status === "success") Swal.fire('สำเร็จ!', 'เพิ่มสัตว์เลี้ยงเรียบร้อย', 'success').then(() => window.location.reload());
       } catch (err) { Swal.fire('Error', 'เชื่อมต่อขัดข้อง', 'error'); }
