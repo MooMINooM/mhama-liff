@@ -117,7 +117,7 @@
         document.getElementById("userImg").src = profile.pictureUrl || "https://via.placeholder.com/90";
 
         // ดึงข้อมูลจาก API
-        const response = await fetch(API_URL + "?lineId=" + profile.userId);
+        const response = await fetch(API_URL + "?lineId=" + profile.userId + "&t=" + new Date().getTime());
         const data = await response.json();
 
         document.getElementById("loading").style.display = "none";
