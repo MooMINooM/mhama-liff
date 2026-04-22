@@ -42,6 +42,11 @@
       </div>
 
       <div class="container mt-4 pb-5">
+        <div id="surveyAlert" class="alert alert-success d-flex justify-content-between align-items-center mb-4 shadow-sm" style="display: none !important; border-radius: 15px;">
+          <div><i class="fa-solid fa-bell text-success"></i> คุณมีบริการที่รอประเมินผล!</div>
+          <button class="btn btn-sm btn-success rounded-pill" onclick="showSurveyForm()">ประเมินรับบริการ</button>
+        </div>
+
         <div class="d-flex justify-content-between align-items-center mb-3">
           <h5 class="fw-bold mb-0" style="color: #1A4B84;"><i class="fa-solid fa-paw"></i> สัตว์เลี้ยงของคุณ</h5>
           <button class="btn btn-sm btn-outline-primary rounded-pill shadow-sm" onclick="showAddPetForm()"><i class="fa-solid fa-plus"></i> เพิ่มตัวใหม่</button>
@@ -67,7 +72,8 @@
             <select class="form-select" id="bookServiceType" required>
               <option value="" disabled selected>-- เลือกประเภท --</option>
               <option value="ฉีดวัคซีน">ฉีดวัคซีน</option>
-              <option value="ทำหมัน">รับวัคซีน(ฉีดเอง)</option>
+              <option value="รับวัคซีนไปฉีดเอง">รับวัคซีนไปฉีดเอง</option>
+              <option value="อื่นๆ">อื่นๆ</option>
             </select>
           </div>
           <div class="mb-3">
@@ -150,7 +156,6 @@
           <input type="hidden" id="lineId"><input type="hidden" id="imgUrl">
           <h6 class="text-secondary fw-bold border-bottom pb-2">👤 ข้อมูลเจ้าของ</h6>
           
-          <!-- แก้ไขการแยกชื่อกับนามสกุล -->
           <div class="row mb-2">
             <div class="col-3 pe-1"><select class="form-select" id="ownerPrefix" required><option value="" disabled selected>คำนำ</option><option value="นาย">นาย</option><option value="นาง">นาง</option><option value="นางสาว">นางสาว</option></select></div>
             <div class="col-4 px-1"><input type="text" class="form-control" id="ownerFirstName" placeholder="ชื่อ *" required></div>
@@ -159,7 +164,6 @@
           
           <div class="mb-2"><input type="tel" class="form-control" id="ownerPhone" placeholder="เบอร์โทรศัพท์ *" required></div>
           
-          <!-- เพิ่มช่องหมู่ที่ และ ซอย/ถนน -->
           <div class="row mb-2">
             <div class="col-4 pe-1"><input type="text" class="form-control" id="addressNo" placeholder="บ้านเลขที่ *" required></div>
             <div class="col-4 px-1"><input type="text" class="form-control" id="moo" placeholder="หมู่ที่"></div>
@@ -193,27 +197,19 @@
     let currentLineId = "";
     let pendingApptsGlobal = [];
 
-    // ฟังก์ชันเช็กว่า "ถึงวันนัดหรือยัง"
     function isAppointmentReady(dateStr) {
       if (!dateStr) return false;
-      
-      // แก้ไข: ตัดเครื่องหมาย ' ออกก่อน เพื่อให้ระบบอ่านวันที่ได้
       let cleanDateStr = dateStr.toString().replace(/'/g, '');
       let apptDate = new Date(cleanDateStr);
-      
-      // กรณีวันที่จาก Google Sheet มาเป็นแบบ Text (DD/MM/YYYY)
       if (isNaN(apptDate)) {
         const parts = cleanDateStr.split(' ')[0].split('/');
         if (parts.length === 3) apptDate = new Date(parts[2], parts[1]-1, parts[0]);
       }
       if (isNaN(apptDate)) return false;
-
-      // เซ็ตเวลาเป็นเที่ยงคืน เพื่อเทียบแค่วันที่
       apptDate.setHours(0,0,0,0);
       let today = new Date();
       today.setHours(0,0,0,0);
-
-      return apptDate <= today; // ถ้าวันที่นัด น้อยกว่าหรือเท่ากับ วันนี้ = ถึงเวลานัดแล้ว
+      return apptDate <= today;
     }
 
     async function startApp() {
@@ -227,7 +223,6 @@
         document.getElementById("imgUrl").value = profile.pictureUrl;
         if(document.getElementById("userImg")) document.getElementById("userImg").src = profile.pictureUrl;
 
-        // ดึงข้อมูล
         const fetchUrl = API_URL + "?lineId=" + profile.userId + "&t=" + new Date().getTime();
         const response = await fetch(fetchUrl, { method: 'GET', redirect: 'follow' });
         const data = await response.json();
@@ -246,24 +241,17 @@
 
           if(data.pets && data.pets.length > 0) {
             data.pets.forEach(pet => {
-              // 1. ค้นหาว่าสัตว์เลี้ยงตัวนี้ มีคิวที่ "รอรับบริการ" ไหม?
               const petAppt = pendingApptsGlobal.find(a => a.petName === pet.petName);
-              
-              // 2. ลอจิกปุ่มประเมิน
               let evaluateBtnHtml = `<button class="btn btn-sm w-100 rounded-pill shadow-sm py-2" disabled style="background-color: #BDC3C7; color: white;"><i class="fa-solid fa-star"></i> ประเมิน</button>`;
               
               if (petAppt) {
-                // ถ้ามีคิว เช็กว่าถึงวันนัดหรือยัง
                 if (isAppointmentReady(petAppt.date)) {
-                  // ถึงวันนัดแล้ว -> ขึ้นสีส้มให้กดได้
                   evaluateBtnHtml = `<button class="btn btn-sm btn-evaluate w-100 rounded-pill shadow-sm py-2" onclick="showSurveyForm('${petAppt.apptId}', '${pet.petName}')"><i class="fa-solid fa-star"></i> ประเมิน</button>`;
                 } else {
-                  // ยังไม่ถึงวันนัด -> เป็นสีเทากดเพื่อดูแจ้งเตือน
                   evaluateBtnHtml = `<button class="btn btn-sm w-100 rounded-pill shadow-sm py-2" style="background-color: #95A5A6; color: white;" onclick="Swal.fire('ยังไม่ถึงคิว', 'สามารถประเมินได้เมื่อถึงวันที่นัดหมายครับ', 'info')"><i class="fa-solid fa-star"></i> ประเมิน</button>`;
                 }
               }
 
-              // 3. วาดการ์ด Layout ใหม่ (สลับ: ประวัติ ซ้าย, นัดหมาย/ประเมิน ขวา)
               petList.innerHTML += `
                 <div class="pet-card mb-3 p-3 bg-white shadow-sm border-0 border-start border-4" style="border-color: #3498DB !important; border-radius: 12px;">
                   <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-3">
@@ -272,11 +260,9 @@
                   </div>
                   
                   <div class="row g-2">
-                    <!-- คอลัมน์ซ้าย: ประวัติ (ชิดซ้ายล่าง) -->
                     <div class="col-6 d-flex flex-column justify-content-end">
                       <button class="btn btn-sm btn-outline-secondary w-100 rounded-pill shadow-sm py-2" onclick="showHistory('${pet.petName}')"><i class="fa-solid fa-clock-rotate-left"></i> ประวัติ</button>
                     </div>
-                    <!-- คอลัมน์ขวา: นัดหมาย + ประเมิน -->
                     <div class="col-6 d-flex flex-column gap-2">
                       <button class="btn btn-sm btn-main w-100 rounded-pill shadow-sm py-2" onclick="showBookingForm('${pet.petId}', '${pet.petName}')"><i class="fa-solid fa-calendar-plus"></i> นัดหมาย</button>
                       ${evaluateBtnHtml}
@@ -294,9 +280,6 @@
       }
     }
 
-    // -----------------------------------------------------------
-    // ฟังก์ชันเปลี่ยนหน้าจอ
-    // -----------------------------------------------------------
     function goHome() {
       document.getElementById("bookingBox").style.display = "none";
       document.getElementById("surveyBox").style.display = "none";
@@ -327,7 +310,6 @@
       document.getElementById("addPetBox").style.display = "block";
     }
 
-    // โหลดประวัติของสัตว์เลี้ยง
     async function showHistory(petName) {
       goHome();
       document.getElementById("welcomeBox").style.display = "none";
@@ -344,7 +326,6 @@
         });
         const result = await res.json();
         if(result.status === "success") {
-           // กรองเอาเฉพาะประวัติของสัตว์เลี้ยงตัวที่กด
            const myHist = result.history.filter(h => h.petName === petName);
            let html = "";
            
@@ -368,11 +349,6 @@
       }
     }
 
-    // -----------------------------------------------------------
-    // ฟังก์ชันส่งข้อมูลไปยัง Google Sheet
-    // -----------------------------------------------------------
-    
-    // 1. ส่งผลประเมิน
     document.getElementById("surveyForm").addEventListener("submit", async function(e) {
       e.preventDefault();
       document.getElementById("btnSubmitSurvey").innerHTML = `<span class="spinner-border spinner-border-sm"></span> กำลังส่งข้อมูล...`;
@@ -398,7 +374,6 @@
       } catch (err) { Swal.fire('Error', 'ผิดพลาด', 'error'); }
     });
 
-    // 2. ส่งข้อมูลจองคิว
     document.getElementById("bookingForm").addEventListener("submit", async function(e) {
       e.preventDefault();
       document.getElementById("btnBook").innerHTML = `<span class="spinner-border spinner-border-sm"></span> กำลังบันทึก...`;
@@ -415,15 +390,12 @@
       } catch (err) { Swal.fire('Error', 'เชื่อมต่อขัดข้อง', 'error'); }
     });
 
-    // 3. ลงทะเบียนแรกเข้า (รวบที่อยู่เข้าด้วยกันก่อนส่งให้ Code.gs)
     document.getElementById("registerForm").addEventListener("submit", async function(e) {
       e.preventDefault();
       document.getElementById("btnRegister").innerHTML = `<span class="spinner-border spinner-border-sm"></span> กำลังบันทึก...`;
       
-      // ดึงข้อมูลชื่อและนามสกุลมาต่อกัน
       const fullName = document.getElementById("ownerPrefix").value + document.getElementById("ownerFirstName").value + " " + document.getElementById("ownerLastName").value;
       
-      // ดึงข้อมูล หมู่ที่ และ ซอย มารวมกับบ้านเลขที่
       let addrPart = document.getElementById("addressNo").value;
       const mooVal = document.getElementById("moo").value;
       const soiVal = document.getElementById("soi").value;
@@ -444,7 +416,6 @@
       } catch (err) { Swal.fire('Error', 'เชื่อมต่อขัดข้อง', 'error'); }
     });
 
-    // 4. เพิ่มสัตว์เลี้ยงตัวใหม่
     document.getElementById("addPetForm").addEventListener("submit", async function(e) {
       e.preventDefault();
       document.getElementById("btnAddPet").innerHTML = `<span class="spinner-border spinner-border-sm"></span> กำลังบันทึก...`;
