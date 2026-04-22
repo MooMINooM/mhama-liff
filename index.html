@@ -37,6 +37,10 @@
       <div class="header-bg text-center">
         <img id="userImg" src="https://via.placeholder.com/90" class="profile-img mb-2" alt="Profile">
         <h5 class="fw-bold mb-1">คุณ <span id="welcomeName"></span></h5>
+        <!-- เพิ่มส่วนแสดงที่อยู่กลับมาแล้วครับ -->
+        <div class="small text-light opacity-75 mt-2 text-start px-3" style="font-size: 13px;">
+          <i class="fa-solid fa-location-dot"></i> <b>ที่อยู่:</b> <span id="welcomeAddress"></span>
+        </div>
       </div>
 
       <div class="container mt-4 pb-5">
@@ -210,6 +214,7 @@
         if (data.status === "found") {
           document.getElementById("welcomeBox").style.display = "block";
           document.getElementById("welcomeName").innerText = data.name;
+          document.getElementById("welcomeAddress").innerText = data.address; // ใส่ข้อมูลที่อยู่
           pendingApptsGlobal = data.pendingAppts || [];
           
           const petList = document.getElementById("petListContainer");
