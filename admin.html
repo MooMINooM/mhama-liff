@@ -8,65 +8,188 @@
   <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   
   <style>
-    body { font-family: 'Prompt', sans-serif; background-color: #F4F6F9; color: #333; }
-    .sidebar { background-color: #1A4B84; min-height: 100vh; padding: 20px 0; color: white; }
-    .sidebar-brand { font-size: 1.2rem; font-weight: bold; padding: 0 20px 20px; border-bottom: 1px solid rgba(255,255,255,0.1); margin-bottom: 20px; }
-    .nav-link { color: rgba(255,255,255,0.8); padding: 12px 20px; transition: 0.2s; }
+    body { font-family: 'Prompt', sans-serif; background-color: #F4F6F9; color: #333; overflow-x: hidden; }
+    .sidebar { background-color: #1A4B84; min-height: 100vh; padding: 20px 0; color: white; position: sticky; top: 0; }
+    .sidebar-brand { font-size: 1.2rem; font-weight: bold; padding: 0 20px 20px; border-bottom: 1px solid rgba(255,255,255,0.1); margin-bottom: 10px; }
+    .nav-link { color: rgba(255,255,255,0.7); padding: 12px 20px; transition: 0.2s; cursor: pointer; }
     .nav-link:hover, .nav-link.active { background-color: rgba(255,255,255,0.1); color: white; border-left: 4px solid #3498DB; }
-    .card-stat { border: none; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+    .card-stat { border: none; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); transition: transform 0.2s; }
+    .card-stat:hover { transform: translateY(-3px); }
     .table-custom { background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
-    .table-custom th { background-color: #3498DB; color: white; font-weight: 500; border: none; }
-    .table-custom td { vertical-align: middle; border-bottom: 1px solid #eee; }
-    .btn-confirm { background-color: #2ECC71; color: white; border-radius: 20px; border: none; font-size: 0.9rem; padding: 5px 15px; }
-    .btn-confirm:hover { background-color: #27AE60; color: white; }
+    .table-custom th { background-color: #3498DB; color: white; font-weight: 500; border: none; padding: 12px 15px; }
+    .table-custom td { vertical-align: middle; padding: 12px 15px; }
+    .section-view { display: none; animation: fadeIn 0.3s; } 
+    .section-view.active { display: block; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    .star-rating { color: #f39c12; }
+    .progress-thin { height: 10px; border-radius: 5px; background-color: #e9ecef; }
+    
+    /* สไตล์ปฏิทินแบบ Tab */
+    .day-tab { padding: 15px; border-radius: 10px; border: 1px solid #ddd; background: white; cursor: pointer; transition: 0.2s; text-align: center; }
+    .day-tab:hover { border-color: #3498DB; background: #F0F8FF; }
+    .day-tab.active { background: #3498DB; color: white; border-color: #3498DB; box-shadow: 0 4px 10px rgba(52,152,219,0.3); }
+    .day-tab.active .text-muted { color: #E0F2FE !important; }
+    
+    .feedback-card { background: white; border-radius: 15px; border-left: 4px solid #2ECC71; box-shadow: 0 2px 8px rgba(0,0,0,0.05); padding: 20px; height: 100%; position: relative; }
+    .feedback-icon { color: #EAFAF1; font-size: 3rem; position: absolute; right: 20px; top: 20px; z-index: 0; }
   </style>
 </head>
 <body>
 
-  <div class="container-fluid">
-    <div class="row">
-      <div class="col-md-2 d-none d-md-block sidebar">
-        <div class="sidebar-brand">
-          <i class="fa-solid fa-stethoscope"></i> ระบบมะหมา (Admin)
-        </div>
+  <div class="container-fluid p-0">
+    <div class="row g-0">
+      <!-- ================= เมนูด้านซ้าย ================= -->
+      <div class="col-md-2 sidebar d-flex flex-column">
+        <div class="sidebar-brand"><i class="fa-solid fa-stethoscope"></i> ระบบมะหมา</div>
         <div class="nav flex-column">
-          <a href="#" class="nav-link active"><i class="fa-solid fa-list-check me-2"></i> จัดการคิววันนี้</a>
+          <a class="nav-link active" onclick="switchMenu('dashboard', this)"><i class="fa-solid fa-chart-pie me-2"></i> สถิติภาพรวม</a>
+          <a class="nav-link" onclick="switchMenu('queue', this)"><i class="fa-solid fa-calendar-days me-2"></i> ปฏิทินคิว (3 วัน)</a>
+          <a class="nav-link" onclick="switchMenu('feedback', this)"><i class="fa-solid fa-comments me-2"></i> ข้อเสนอแนะ</a>
+        </div>
+        <div class="mt-auto p-3 text-center opacity-50 small">
+          อัปเดตข้อมูลแบบ Real-time
         </div>
       </div>
 
-      <div class="col-md-10 p-4">
+      <!-- ================= เนื้อหาด้านขวา ================= -->
+      <div class="col-md-10 p-4 bg-light" style="min-height: 100vh;">
+        
         <div class="d-flex justify-content-between align-items-center mb-4">
-          <h4 class="fw-bold" style="color: #1A4B84;">จัดการนัดหมายรับบริการ</h4>
-          <button class="btn btn-primary btn-sm rounded-pill px-3" onclick="loadData()"><i class="fa-solid fa-rotate-right"></i> รีเฟรชข้อมูล</button>
+          <div>
+            <h4 class="fw-bold mb-0" style="color: #1A4B84;" id="pageTitle">ภาพรวมและสถิติการให้บริการ</h4>
+            <small class="text-muted" id="lastUpdateText">อัปเดตล่าสุด: -</small>
+          </div>
+          <button class="btn btn-primary rounded-pill px-4 shadow-sm" onclick="loadAllData()" id="btnRefresh">
+            <i class="fa-solid fa-rotate-right me-1"></i> รีเฟรชข้อมูล
+          </button>
         </div>
 
-        <div class="row mb-4">
-          <div class="col-md-4">
-            <div class="card card-stat p-3 border-start border-primary border-4">
-              <h6 class="text-muted mb-1">คิวรอรับบริการทั้งหมด</h6>
-              <h3 class="fw-bold text-primary mb-0" id="totalQueue">0</h3>
+        <div id="loadingOverlay" class="text-center py-5" style="display: none;">
+          <div class="spinner-border text-primary mb-3" style="width: 3rem; height: 3rem;"></div>
+          <h5 class="text-muted">กำลังประมวลผลข้อมูล...</h5>
+        </div>
+
+        <!-- ================= 1. หน้า Dashboard (สถิติ) ================= -->
+        <div id="view-dashboard" class="section-view active">
+          
+          <!-- แถว 1: Highlight ตัวเลขสำคัญ -->
+          <div class="row mb-4">
+            <div class="col-md-6">
+              <div class="card card-stat p-4 border-start border-danger border-5 text-center h-100 bg-white d-flex flex-row align-items-center justify-content-center gap-4">
+                <i class="fa-solid fa-clock text-danger opacity-50" style="font-size: 3rem;"></i>
+                <div class="text-start">
+                  <h6 class="text-muted mb-1">จำนวนคิวรอรับบริการวันนี้</h6>
+                  <h1 class="fw-bold text-danger mb-0" id="statQueueToday">0 <span class="fs-5 fw-normal text-muted">คิว</span></h1>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="card card-stat p-4 border-start border-warning border-5 text-center h-100 bg-white d-flex flex-row align-items-center justify-content-center gap-4">
+                <i class="fa-solid fa-star text-warning opacity-50" style="font-size: 3rem;"></i>
+                <div class="text-start">
+                  <h6 class="text-muted mb-1">ความพึงพอใจเฉลี่ยรวม</h6>
+                  <h1 class="fw-bold text-warning mb-0" id="statAvg">0.00 <span class="fs-5 fw-normal text-muted">/ 5.0</span></h1>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- แถว 2: กราฟ (พร้อมปุ่มเลือกช่วงเวลา) และ แถบคะแนนความพึงพอใจ -->
+          <div class="row g-4 mb-4">
+            <!-- ซ้าย: กราฟ -->
+            <div class="col-lg-7">
+              <div class="card card-stat p-4 h-100">
+                <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
+                  <div>
+                    <h6 class="fw-bold text-secondary mb-0"><i class="fa-solid fa-chart-pie"></i> สถิติการให้บริการสำเร็จ</h6>
+                    <small class="text-success fw-bold">ให้บริการแล้ว: <span id="filteredServiceCount" class="fs-5">0</span> ราย</small>
+                  </div>
+                  <!-- ปุ่มตัวกรองกราฟ -->
+                  <div class="btn-group btn-group-sm shadow-sm" role="group">
+                    <input type="radio" class="btn-check" name="chartFilter" id="f_day" autocomplete="off" onchange="filterChart('day')" checked>
+                    <label class="btn btn-outline-primary" for="f_day">วันนี้</label>
+
+                    <input type="radio" class="btn-check" name="chartFilter" id="f_week" autocomplete="off" onchange="filterChart('week')">
+                    <label class="btn btn-outline-primary" for="f_week">สัปดาห์</label>
+
+                    <input type="radio" class="btn-check" name="chartFilter" id="f_month" autocomplete="off" onchange="filterChart('month')">
+                    <label class="btn btn-outline-primary" for="f_month">เดือน</label>
+
+                    <input type="radio" class="btn-check" name="chartFilter" id="f_fy" autocomplete="off" onchange="filterChart('fy')">
+                    <label class="btn btn-outline-primary" for="f_fy">ปีงบฯ <span id="fyYearTxt"></span></label>
+                  </div>
+                </div>
+                
+                <div style="height: 280px; display: flex; justify-content: center; align-items: center;">
+                  <canvas id="serviceChart"></canvas>
+                </div>
+              </div>
+            </div>
+            
+            <!-- ขวา: ผลความพึงพอใจ -->
+            <div class="col-lg-5">
+              <div class="card card-stat p-4 h-100">
+                <h6 class="fw-bold text-secondary mb-4"><i class="fa-solid fa-square-poll-vertical"></i> สรุปผลประเมิน 5 หัวข้อ</h6>
+                
+                <div class="mb-3">
+                  <div class="d-flex justify-content-between small mb-1"><span>1. ความสะดวกในการใช้งานระบบ</span><span class="fw-bold" id="s_q1">0.0</span></div>
+                  <div class="progress progress-thin"><div class="progress-bar bg-info" id="p_q1" style="width: 0%"></div></div>
+                </div>
+                <div class="mb-3">
+                  <div class="d-flex justify-content-between small mb-1"><span>2. ความรวดเร็วในการให้บริการ</span><span class="fw-bold" id="s_q2">0.0</span></div>
+                  <div class="progress progress-thin"><div class="progress-bar bg-success" id="p_q2" style="width: 0%"></div></div>
+                </div>
+                <div class="mb-3">
+                  <div class="d-flex justify-content-between small mb-1"><span>3. ความชัดเจนของข้อมูล/ขั้นตอน</span><span class="fw-bold" id="s_q3">0.0</span></div>
+                  <div class="progress progress-thin"><div class="progress-bar bg-primary" id="p_q3" style="width: 0%"></div></div>
+                </div>
+                <div class="mb-3">
+                  <div class="d-flex justify-content-between small mb-1"><span>4. ความสุภาพและการบริการ</span><span class="fw-bold" id="s_q4">0.0</span></div>
+                  <div class="progress progress-thin"><div class="progress-bar bg-warning" id="p_q4" style="width: 0%"></div></div>
+                </div>
+                <div class="mb-2">
+                  <div class="d-flex justify-content-between small mb-1"><span>5. ความพึงพอใจโดยรวม</span><span class="fw-bold" id="s_q5">0.0</span></div>
+                  <div class="progress progress-thin"><div class="progress-bar bg-danger" id="p_q5" style="width: 0%"></div></div>
+                </div>
+                <div class="text-end mt-3"><span class="badge bg-light text-dark border">จาก <span id="surveyCount">0</span> รีวิว</span></div>
+              </div>
             </div>
           </div>
         </div>
 
-        <div class="table-responsive table-custom">
-          <table class="table table-hover mb-0">
-            <thead>
-              <tr>
-                <th width="10%">หมายเลขคิว</th>
-                <th width="15%">วันที่จอง</th>
-                <th width="20%">ชื่อสัตว์เลี้ยง</th>
-                <th width="20%">เจ้าของ (เบอร์โทร)</th>
-                <th width="15%">บริการ</th>
-                <th width="20%">การจัดการ</th>
-              </tr>
-            </thead>
-            <tbody id="tableBody">
-              <tr><td colspan="6" class="text-center py-4 text-muted"><div class="spinner-border spinner-border-sm text-primary"></div> กำลังโหลดข้อมูล...</td></tr>
-            </tbody>
-          </table>
+        <!-- ================= 2. จัดการคิว (ปฏิทิน 3 วัน) ================= -->
+        <div id="view-queue" class="section-view">
+          
+          <!-- แท็บปฏิทิน 3 วัน -->
+          <div class="row mb-4" id="calendarTabs">
+             <!-- สร้างโดย Javascript -->
+          </div>
+
+          <!-- สรุปของวันที่เลือก -->
+          <div class="d-flex justify-content-between align-items-center mb-3 p-3 bg-white rounded shadow-sm border-start border-primary border-4">
+             <h5 class="fw-bold text-primary mb-0" id="queueSelectedDateText">กำลังโหลด...</h5>
+             <div>
+                <span class="badge bg-light text-dark border p-2 me-2"><i class="fa-solid fa-house text-primary"></i> นัดที่บ้าน: <b id="sumHome" class="fs-6">0</b></span>
+                <span class="badge bg-light text-dark border p-2"><i class="fa-solid fa-hospital text-success"></i> นัดส่วนกลาง: <b id="sumCenter" class="fs-6">0</b></span>
+             </div>
+          </div>
+
+          <div class="table-responsive table-custom">
+            <table class="table table-hover mb-0">
+              <thead><tr><th width="10%">คิว</th><th width="20%">สัตว์เลี้ยง</th><th width="25%">เจ้าของ (เบอร์โทร)</th><th width="25%">สถานที่/บริการ</th><th width="20%" class="text-end">จัดการ (แมนนวล)</th></tr></thead>
+              <tbody id="queueTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- ================= 3. ข้อเสนอแนะ ================= -->
+        <div id="view-feedback" class="section-view">
+          <div class="row g-4" id="feedbackContainer">
+            <!-- การ์ดข้อเสนอแนะจะถูกใส่ตรงนี้ -->
+          </div>
         </div>
 
       </div>
@@ -74,87 +197,306 @@
   </div>
 
   <script>
-    // ⚠️ สำคัญมาก: เอาลิงก์ API อันเดียวกันกับของหน้า index.html มาใส่ตรงนี้ครับ!
+    // ⚠️ สำคัญมาก: ใส่ API URL ของคุณที่นี่
     const API_URL = "https://script.google.com/macros/s/AKfycbz4HSnOhRCVfUWPA_qH9HiegfwX-R4jK8BIwaEAQFZ7iTImV2CsCmwoKDndseOTz2wp5Q/exec";
+    
+    let myChart = null;
+    let globalData = { appt: [], history: [], dashboard: null };
+    let queueDays = [];
 
-    // ฟังก์ชันโหลดข้อมูลตาราง
-    async function loadData() {
-      document.getElementById("tableBody").innerHTML = `<tr><td colspan="6" class="text-center py-4 text-muted"><div class="spinner-border spinner-border-sm text-primary"></div> กำลังโหลดข้อมูล...</td></tr>`;
+    // เปลี่ยนเมนูหน้าหลัก
+    function switchMenu(menuId, element) {
+      document.querySelectorAll('.section-view').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.nav-link').forEach(el => el.classList.remove('active'));
+      document.getElementById('view-' + menuId).classList.add('active');
+      element.classList.add('active');
+      
+      const titles = {
+        'dashboard': 'สถิติภาพรวมการให้บริการ',
+        'queue': 'ปฏิทินจัดการคิว (ล่วงหน้า 3 วัน)',
+        'feedback': 'ข้อเสนอแนะจากผู้ใช้บริการ (ไม่ระบุตัวตน)'
+      };
+      document.getElementById('pageTitle').innerText = titles[menuId];
+    }
+
+    // Tools สำหรับจัดการวันที่
+    function getYMD(dateObj) {
+      return `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, '0')}-${String(dateObj.getDate()).padStart(2, '0')}`;
+    }
+
+    function parseThaiDateStr(str) {
+      if (!str) return new Date(0);
+      const cleanStr = str.replace(/'/g, ''); 
+      const parts = cleanStr.split(' ')[0].split('/');
+      if (parts.length === 3) return new Date(parts[2], parts[1]-1, parts[0]);
+      return new Date(cleanStr); 
+    }
+
+    // โหลดข้อมูลหลักทั้งหมด
+    async function loadAllData() {
+      const btn = document.getElementById("btnRefresh");
+      btn.disabled = true; btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> กำลังโหลด...`;
+      document.getElementById("loadingOverlay").style.display = "block";
+
       try {
-        const res = await fetch(API_URL, { 
-          method: "POST", 
-          body: JSON.stringify({ action: "getAdminData" }),
-          headers: { "Content-Type": "text/plain;charset=utf-8" }
-        });
-        const data = await res.json();
+        const resAdmin = await fetch(API_URL, { method: "POST", body: JSON.stringify({ action: "getAdminData" }), headers: { "Content-Type": "text/plain;charset=utf-8" } });
+        const adminData = await resAdmin.json();
+        const resHist = await fetch(API_URL, { method: "POST", body: JSON.stringify({ action: "getHistory" }), headers: { "Content-Type": "text/plain;charset=utf-8" } });
+        const histData = await resHist.json();
 
-        if(data.status === "success") {
-          document.getElementById("totalQueue").innerText = data.appointments.length;
+        if (adminData.status === "success" && histData.status === "success") {
+          globalData = { appt: adminData.appointments, dashboard: adminData.dashboardInfo, history: histData.history };
           
-          if(data.appointments.length === 0) {
-            document.getElementById("tableBody").innerHTML = `<tr><td colspan="6" class="text-center py-4 text-muted">🎉 ไม่มีคิวค้างในระบบ</td></tr>`;
-            return;
-          }
-
-          let html = "";
-          // เรียงข้อมูลตามคิว
-          data.appointments.forEach(appt => {
-            html += `
-              <tr>
-                <td class="text-center"><span class="badge bg-primary fs-6">${appt.queueNo}</span></td>
-                <td>${appt.date} <br><small class="text-muted">${appt.location}</small></td>
-                <td class="fw-bold text-dark"><i class="fa-solid fa-paw text-secondary"></i> ${appt.petName}</td>
-                <td>${appt.ownerName}<br><small class="text-muted"><i class="fa-solid fa-phone"></i> ${appt.phone}</small></td>
-                <td>${appt.serviceType}</td>
-                <td>
-                  <button class="btn btn-confirm shadow-sm" onclick="confirmService('${appt.apptId}', '${appt.petName}')">
-                    <i class="fa-solid fa-check-circle"></i> ยืนยันให้บริการ
-                  </button>
-                </td>
-              </tr>
-            `;
-          });
-          document.getElementById("tableBody").innerHTML = html;
+          processDashboardUI();
+          filterChart('day'); // เริ่มต้นวาดกราฟแบบรายวัน
+          setupQueueCalendar();
+          processFeedbacks(globalData.dashboard.feedbacks);
+          
+          document.getElementById("lastUpdateText").innerText = `อัปเดตล่าสุด: ${new Date().toLocaleTimeString('th-TH')}`;
         }
-      } catch (error) {
-        document.getElementById("tableBody").innerHTML = `<tr><td colspan="6" class="text-center py-4 text-danger">เกิดข้อผิดพลาดในการโหลดข้อมูล</td></tr>`;
+      } catch (e) {
+        Swal.fire('ข้อผิดพลาด', 'เชื่อมต่อข้อมูลล้มเหลว', 'error');
+      } finally {
+        btn.disabled = false; btn.innerHTML = `<i class="fa-solid fa-rotate-right me-1"></i> รีเฟรชข้อมูล`;
+        document.getElementById("loadingOverlay").style.display = "none";
       }
     }
 
-    // ฟังก์ชันกดยืนยันการรักษาเสร็จสิ้น
-    function confirmService(apptId, petName) {
-      Swal.fire({
-        title: 'ยืนยันให้บริการเสร็จสิ้น?',
-        text: `คุณกำลังยืนยันว่าให้บริการ "${petName}" เรียบร้อยแล้ว (ระบบจะบันทึกประวัติให้อัตโนมัติ)`,
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#2ECC71',
-        cancelButtonColor: '#d33',
-        confirmButtonText: 'ยืนยันเสร็จสิ้น',
-        cancelButtonText: 'ยกเลิก'
-      }).then(async (result) => {
-        if (result.isConfirmed) {
-          Swal.fire({ title: 'กำลังบันทึก...', allowOutsideClick: false, showConfirmButton: false, willOpen: () => { Swal.showLoading() } });
-          
-          try {
-            const res = await fetch(API_URL, { 
-              method: "POST", 
-              body: JSON.stringify({ action: "confirmService", apptId: apptId }),
-              headers: { "Content-Type": "text/plain;charset=utf-8" }
-            });
-            const out = await res.json();
-            
-            if(out.status === "success") {
-              Swal.fire('สำเร็จ!', 'บันทึกประวัติการรับบริการเรียบร้อย', 'success');
-              loadData(); // โหลดตารางใหม่
-            }
-          } catch (err) { Swal.fire('Error', 'ไม่สามารถบันทึกข้อมูลได้', 'error'); }
-        }
-      })
+    // ----------------------------------------------------
+    // ส่วนที่ 1: Dashboard สถิติ
+    // ----------------------------------------------------
+    function processDashboardUI() {
+      const now = new Date();
+      const todayYMD = getYMD(now);
+      
+      // คิววันนี้
+      const qToday = globalData.appt.filter(a => a.dateRaw && a.dateRaw.includes(todayYMD)).length;
+      document.getElementById("statQueueToday").innerText = qToday;
+
+      // ปีงบประมาณ (แสดงในปุ่ม Toggle)
+      let currentYear = now.getFullYear();
+      let displayYearThai = (now.getMonth() >= 9) ? currentYear + 544 : currentYear + 543;
+      document.getElementById("fyYearTxt").innerText = `${displayYearThai}`;
+
+      // ผลประเมิน
+      const avg = globalData.dashboard.surveyAvg;
+      document.getElementById("surveyCount").innerText = globalData.dashboard.surveyCount;
+      if(globalData.dashboard.surveyCount > 0) {
+        document.getElementById("statAvg").innerText = avg.totalAvg;
+        
+        ['q1','q2','q3','q4','q5'].forEach(q => {
+           document.getElementById(`s_${q}`).innerText = avg[q];
+           document.getElementById(`p_${q}`).style.width = (avg[q] * 20) + "%";
+        });
+      }
     }
 
-    // โหลดข้อมูลอัตโนมัติเมื่อเปิดหน้าเว็บ
-    window.onload = loadData;
+    // ฟังก์ชันกรองกราฟตามช่วงเวลา
+    function filterChart(period) {
+      const now = new Date();
+      const todayStr = `${String(now.getDate()).padStart(2,'0')}/${String(now.getMonth()+1).padStart(2,'0')}/${now.getFullYear()}`;
+      
+      let startDate, endDate;
+      if(period === 'day') {
+         startDate = new Date(); startDate.setHours(0,0,0,0);
+         endDate = new Date(); endDate.setHours(23,59,59,999);
+      } else if (period === 'week') {
+         const d = now.getDay() || 7;
+         startDate = new Date(now); startDate.setDate(now.getDate() - d + 1); startDate.setHours(0,0,0,0);
+         endDate = new Date();
+      } else if (period === 'month') {
+         startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+         endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59);
+      } else if (period === 'fy') {
+         if (now.getMonth() >= 9) { startDate = new Date(now.getFullYear(), 9, 1); endDate = new Date(now.getFullYear()+1, 8, 30, 23, 59, 59); } 
+         else { startDate = new Date(now.getFullYear()-1, 9, 1); endDate = new Date(now.getFullYear(), 8, 30, 23, 59, 59); }
+      }
+
+      // นับบริการจากประวัติ (History)
+      let serviceStats = { "ฉีดวัคซีน": 0, "ทำหมัน": 0, "ตรวจรักษาโรคทั่วไป": 0, "อื่นๆ": 0 };
+      let totalFiltered = 0;
+
+      globalData.history.forEach(h => {
+        let isMatch = false;
+        if(period === 'day') {
+           if(h.dateDone.includes(todayStr)) isMatch = true;
+        } else {
+           const d = parseThaiDateStr(h.dateDone);
+           if(d >= startDate && d <= endDate) isMatch = true;
+        }
+
+        if(isMatch) {
+           totalFiltered++;
+           const type = h.serviceType || "อื่นๆ";
+           if(serviceStats[type] !== undefined) serviceStats[type]++; else serviceStats["อื่นๆ"]++;
+        }
+      });
+
+      document.getElementById("filteredServiceCount").innerText = totalFiltered;
+
+      // วาดกราฟ
+      const ctx = document.getElementById('serviceChart').getContext('2d');
+      if(myChart) myChart.destroy();
+      myChart = new Chart(ctx, { 
+        type: 'bar', 
+        data: { 
+          labels: Object.keys(serviceStats), 
+          datasets: [{ 
+            label: 'จำนวนการให้บริการ (ครั้ง)',
+            data: Object.values(serviceStats), 
+            backgroundColor: ['#3498DB', '#E74C3C', '#2ECC71', '#F1C40F'],
+            borderRadius: 6 // เพิ่มความโค้งมนให้แท่งกราฟดูสวยขึ้น
+          }] 
+        }, 
+        options: { 
+          responsive: true, 
+          maintainAspectRatio: false, 
+          plugins: { 
+            legend: { display: false } // ซ่อนกล่องข้อความด้านบน เพราะเรามีป้ายชื่อที่แกน X แล้ว
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              ticks: {
+                stepSize: 1 // บังคับให้แกน Y โชว์เป็นจำนวนเต็ม (1, 2, 3...)
+              }
+            }
+          }
+        } 
+      });
+    }
+
+    // ----------------------------------------------------
+    // ส่วนที่ 2: ปฏิทินคิว 3 วัน
+    // ----------------------------------------------------
+    function setupQueueCalendar() {
+      const now = new Date();
+      const labels = ["วันนี้", "พรุ่งนี้", "มะรืนนี้"];
+      queueDays = [0, 1, 2].map(offset => {
+        const d = new Date(now); d.setDate(now.getDate() + offset);
+        return { 
+           ymd: getYMD(d), 
+           title: labels[offset], 
+           dateStr: d.toLocaleDateString('th-TH', { day:'numeric', month:'long', year:'numeric' }) 
+        };
+      });
+
+      // สร้าง Tab
+      let tabHtml = "";
+      queueDays.forEach((day, idx) => {
+        const count = globalData.appt.filter(a => a.dateRaw && a.dateRaw.includes(day.ymd)).length;
+        tabHtml += `
+          <div class="col-4">
+            <div class="day-tab ${idx === 0 ? 'active' : ''}" id="tabDay${idx}" onclick="selectQueueDay(${idx})">
+              <h5 class="fw-bold mb-1">${day.title}</h5>
+              <div class="small text-muted mb-2">${day.dateStr}</div>
+              <span class="badge bg-danger rounded-pill">${count} คิว</span>
+            </div>
+          </div>
+        `;
+      });
+      document.getElementById("calendarTabs").innerHTML = tabHtml;
+      
+      selectQueueDay(0); // เลือกวันนี้เป็นค่าเริ่มต้น
+    }
+
+    function selectQueueDay(idx) {
+      // อัปเดต UI แท็บ
+      document.querySelectorAll('.day-tab').forEach((el, i) => {
+         if(i === idx) el.classList.add('active'); else el.classList.remove('active');
+      });
+
+      const day = queueDays[idx];
+      document.getElementById("queueSelectedDateText").innerHTML = `<i class="fa-solid fa-calendar-check text-primary"></i> คิวสำหรับ ${day.title} (${day.dateStr})`;
+
+      // กรองและวาดตาราง
+      const dayAppts = globalData.appt.filter(a => a.dateRaw && a.dateRaw.includes(day.ymd));
+      let locHome = 0, locCenter = 0;
+      let html = "";
+
+      if(dayAppts.length === 0) {
+        html = `<tr><td colspan="5" class="text-center py-5 text-muted bg-white"><i class="fa-solid fa-bed fs-1 opacity-25 mb-3"></i><br>ไม่มีคิวนัดหมายสำหรับวันนี้</td></tr>`;
+      } else {
+        dayAppts.sort((a,b) => a.queueNo - b.queueNo).forEach(a => {
+          if (a.location && a.location.includes("บ้าน")) locHome++; else locCenter++; 
+          html += `
+            <tr>
+              <td class="text-center"><span class="badge bg-primary fs-6 shadow-sm">${a.queueNo}</span></td>
+              <td class="fw-bold"><i class="fa-solid fa-paw text-secondary"></i> ${a.petName}</td>
+              <td>${a.ownerName}<br><small class="text-muted"><i class="fa-solid fa-phone"></i> ${a.phone}</small></td>
+              <td><span class="badge bg-light text-dark border mb-1">${a.serviceType}</span><br><small class="text-secondary">${a.location}</small></td>
+              <td class="text-end">
+                <button class="btn btn-sm btn-outline-success rounded-pill px-3 shadow-sm" onclick="confirmManual('${a.apptId}')"><i class="fa-solid fa-check"></i> ยืนยันจบงาน</button>
+              </td>
+            </tr>`;
+        });
+      }
+      
+      document.getElementById("sumHome").innerText = locHome;
+      document.getElementById("sumCenter").innerText = locCenter;
+      document.getElementById("queueTableBody").innerHTML = html;
+    }
+
+    // ----------------------------------------------------
+    // ส่วนที่ 3: ข้อเสนอแนะ
+    // ----------------------------------------------------
+    function processFeedbacks(feedbacks) {
+      const container = document.getElementById("feedbackContainer");
+      container.innerHTML = "";
+
+      if (!feedbacks || feedbacks.length === 0) {
+        container.innerHTML = `<div class="col-12 text-center py-5 text-muted"><i class="fa-solid fa-box-open fs-1 mb-3 opacity-25"></i><br>ยังไม่มีข้อเสนอแนะในระบบ</div>`;
+        return;
+      }
+
+      // แสดงจากล่าสุดอยู่บนสุด
+      [...feedbacks].reverse().forEach((fb, index) => {
+        container.innerHTML += `
+          <div class="col-md-6 col-lg-4">
+            <div class="feedback-card">
+              <i class="fa-solid fa-quote-right feedback-icon"></i>
+              <div class="d-flex align-items-center mb-3 position-relative" style="z-index: 1;">
+                <div class="bg-success text-white rounded-circle d-flex justify-content-center align-items-center me-2 shadow-sm" style="width: 40px; height: 40px;">
+                  <i class="fa-solid fa-user-secret"></i>
+                </div>
+                <div>
+                  <h6 class="mb-0 fw-bold text-dark">ผู้ใช้บริการนิรนาม</h6>
+                  <small class="text-muted">รีวิวที่ #${feedbacks.length - index}</small>
+                </div>
+              </div>
+              <p class="text-secondary mb-0" style="position: relative; z-index: 1; font-size: 0.95rem;">"${fb}"</p>
+            </div>
+          </div>
+        `;
+      });
+    }
+
+    // ยืนยันจบงาน
+    function confirmManual(apptId) {
+       Swal.fire({ 
+         title: 'ยืนยันให้บริการเสร็จสิ้น?', 
+         text: 'กรณีลูกค้าไม่ได้สแกน QR ระบบจะตัดคิวนี้และบันทึกประวัติให้ทันที', 
+         icon: 'question', 
+         showCancelButton: true, 
+         confirmButtonColor: '#2ECC71',
+         confirmButtonText: '<i class="fa-solid fa-check"></i> ยืนยันจบงาน',
+         cancelButtonText: 'ยกเลิก'
+       }).then(async (res) => {
+          if(res.isConfirmed) {
+            Swal.fire({ title: 'กำลังบันทึก...', allowOutsideClick: false, showConfirmButton: false, willOpen: () => { Swal.showLoading() } });
+            try {
+              const req = await fetch(API_URL, { method: "POST", body: JSON.stringify({ action: "confirmService", apptId: apptId }), headers: { "Content-Type": "text/plain;charset=utf-8" } });
+              const result = await req.json();
+              if(result.status === "success") {
+                Swal.fire('สำเร็จ', 'ตัดคิวและบันทึกประวัติเรียบร้อย', 'success');
+                loadAllData();
+              }
+            } catch(e) {}
+          }
+       });
+    }
+
+    window.onload = loadAllData;
   </script>
 </body>
 </html>
