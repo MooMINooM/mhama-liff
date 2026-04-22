@@ -156,10 +156,14 @@
         <form id="registerForm">
           <input type="hidden" id="lineId"><input type="hidden" id="imgUrl">
           <h6 class="text-secondary fw-bold border-bottom pb-2">👤 ข้อมูลเจ้าของ</h6>
+          
+          <!-- แก้ไขการแยกชื่อกับนามสกุล -->
           <div class="row mb-2">
-            <div class="col-4 pe-1"><select class="form-select" id="ownerPrefix" required><option value="" disabled selected>คำนำ</option><option value="นาย">นาย</option><option value="นาง">นาง</option><option value="นางสาว">นางสาว</option></select></div>
-            <div class="col-8 ps-1"><input type="text" class="form-control" id="ownerName" placeholder="ชื่อ-นามสกุล *" required></div>
+            <div class="col-3 pe-1"><select class="form-select" id="ownerPrefix" required><option value="" disabled selected>คำนำ</option><option value="นาย">นาย</option><option value="นาง">นาง</option><option value="นางสาว">นางสาว</option></select></div>
+            <div class="col-4 px-1"><input type="text" class="form-control" id="ownerFirstName" placeholder="ชื่อ *" required></div>
+            <div class="col-5 ps-1"><input type="text" class="form-control" id="ownerLastName" placeholder="นามสกุล *" required></div>
           </div>
+          
           <div class="mb-2"><input type="tel" class="form-control" id="ownerPhone" placeholder="เบอร์โทรศัพท์ *" required></div>
           
           <!-- เพิ่มช่องหมู่ที่ และ ซอย/ถนน -->
@@ -418,7 +422,9 @@
     document.getElementById("registerForm").addEventListener("submit", async function(e) {
       e.preventDefault();
       document.getElementById("btnRegister").innerHTML = `<span class="spinner-border spinner-border-sm"></span> กำลังบันทึก...`;
-      const fullName = document.getElementById("ownerPrefix").value + document.getElementById("ownerName").value;
+      
+      // ดึงข้อมูลชื่อและนามสกุลมาต่อกัน
+      const fullName = document.getElementById("ownerPrefix").value + document.getElementById("ownerFirstName").value + " " + document.getElementById("ownerLastName").value;
       
       // ดึงข้อมูล หมู่ที่ และ ซอย มารวมกับบ้านเลขที่
       let addrPart = document.getElementById("addressNo").value;
