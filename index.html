@@ -42,11 +42,6 @@
       </div>
 
       <div class="container mt-4 pb-5">
-        <div id="surveyAlert" class="alert alert-success d-flex justify-content-between align-items-center mb-4 shadow-sm" style="display: none !important; border-radius: 15px;">
-          <div><i class="fa-solid fa-bell text-success"></i> คุณมีบริการที่รอประเมินผล!</div>
-          <button class="btn btn-sm btn-success rounded-pill" onclick="showSurveyForm()">ประเมินรับบริการ</button>
-        </div>
-
         <div class="d-flex justify-content-between align-items-center mb-3">
           <h5 class="fw-bold mb-0" style="color: #1A4B84;"><i class="fa-solid fa-paw"></i> สัตว์เลี้ยงของคุณ</h5>
           <button class="btn btn-sm btn-outline-primary rounded-pill shadow-sm" onclick="showAddPetForm()"><i class="fa-solid fa-plus"></i> เพิ่มตัวใหม่</button>
@@ -105,11 +100,11 @@
           <input type="hidden" id="surveyApptId">
           <p class="fw-bold text-primary mb-2 mt-2" style="font-size:14px;">กรุณาให้คะแนน (5=ดีมาก, 1=ควรปรับปรุง)</p>
           
-          <div class="mb-3 mt-4"><label class="form-label fw-bold small">1. ความสะดวกในการใช้งานระบบ</label><select class="form-select" id="q1" required><option value="5" selected>5 - ดีมาก</option><option value="4">4 - ดี</option><option value="3">3 - ปานกลาง</option><option value="2">2 - พอใช้</option><option value="1">1 - ควรปรับปรุง</option></select></div>
-          <div class="mb-3 mt-4"><label class="form-label fw-bold small">2. ความรวดเร็วในการให้บริการ</label><select class="form-select" id="q2" required><option value="5" selected>5 - ดีมาก</option><option value="4">4 - ดี</option><option value="3">3 - ปานกลาง</option><option value="2">2 - พอใช้</option><option value="1">1 - ควรปรับปรุง</option></select></div>
-          <div class="mb-3 mt-4"><label class="form-label fw-bold small">3. ความชัดเจนของข้อมูล/ขั้นตอน</label><select class="form-select" id="q3" required><option value="5" selected>5 - ดีมาก</option><option value="4">4 - ดี</option><option value="3">3 - ปานกลาง</option><option value="2">2 - พอใช้</option><option value="1">1 - ควรปรับปรุง</option></select></div>
-          <div class="mb-3 mt-4"><label class="form-label fw-bold small">4. ความสุภาพและการบริการ</label><select class="form-select" id="q4" required><option value="5" selected>5 - ดีมาก</option><option value="4">4 - ดี</option><option value="3">3 - ปานกลาง</option><option value="2">2 - พอใช้</option><option value="1">1 - ควรปรับปรุง</option></select></div>
-          <div class="mb-3 mt-4"><label class="form-label fw-bold small">5. ความพึงพอใจโดยรวม</label><select class="form-select" id="q5" required><option value="5" selected>5 - ดีมาก</option><option value="4">4 - ดี</option><option value="3">3 - ปานกลาง</option><option value="2">2 - พอใช้</option><option value="1">1 - ควรปรับปรุง</option></select></div>
+          <div class="mb-3"><label class="form-label small">1. ความสะดวกในการใช้งานระบบ</label><select class="form-select" id="q1" required><option value="5" selected>5 - ดีมาก</option><option value="4">4 - ดี</option><option value="3">3 - ปานกลาง</option><option value="2">2 - พอใช้</option><option value="1">1 - ควรปรับปรุง</option></select></div>
+          <div class="mb-3"><label class="form-label small">2. ความรวดเร็วในการให้บริการ</label><select class="form-select" id="q2" required><option value="5" selected>5 - ดีมาก</option><option value="4">4 - ดี</option><option value="3">3 - ปานกลาง</option><option value="2">2 - พอใช้</option><option value="1">1 - ควรปรับปรุง</option></select></div>
+          <div class="mb-3"><label class="form-label small">3. ความชัดเจนของข้อมูล/ขั้นตอน</label><select class="form-select" id="q3" required><option value="5" selected>5 - ดีมาก</option><option value="4">4 - ดี</option><option value="3">3 - ปานกลาง</option><option value="2">2 - พอใช้</option><option value="1">1 - ควรปรับปรุง</option></select></div>
+          <div class="mb-3"><label class="form-label small">4. ความสุภาพและการบริการ</label><select class="form-select" id="q4" required><option value="5" selected>5 - ดีมาก</option><option value="4">4 - ดี</option><option value="3">3 - ปานกลาง</option><option value="2">2 - พอใช้</option><option value="1">1 - ควรปรับปรุง</option></select></div>
+          <div class="mb-3"><label class="form-label small">5. ความพึงพอใจโดยรวม</label><select class="form-select" id="q5" required><option value="5" selected>5 - ดีมาก</option><option value="4">4 - ดี</option><option value="3">3 - ปานกลาง</option><option value="2">2 - พอใช้</option><option value="1">1 - ควรปรับปรุง</option></select></div>
           
           <div class="mb-3 mt-4">
             <label class="form-label fw-bold small">6. ข้อเสนอแนะเพิ่มเติม</label>
@@ -203,10 +198,14 @@
     // ฟังก์ชันเช็กว่า "ถึงวันนัดหรือยัง"
     function isAppointmentReady(dateStr) {
       if (!dateStr) return false;
-      let apptDate = new Date(dateStr);
-      // กรณีวันที่จาก Google Sheet มาเป็นแบบ Text
+      
+      // แก้ไข: ตัดเครื่องหมาย ' ออกก่อน เพื่อให้ระบบอ่านวันที่ได้
+      let cleanDateStr = dateStr.toString().replace(/'/g, '');
+      let apptDate = new Date(cleanDateStr);
+      
+      // กรณีวันที่จาก Google Sheet มาเป็นแบบ Text (DD/MM/YYYY)
       if (isNaN(apptDate)) {
-        const parts = dateStr.toString().replace(/'/g, '').split(' ')[0].split('/');
+        const parts = cleanDateStr.split(' ')[0].split('/');
         if (parts.length === 3) apptDate = new Date(parts[2], parts[1]-1, parts[0]);
       }
       if (isNaN(apptDate)) return false;
