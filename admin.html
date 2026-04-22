@@ -111,14 +111,14 @@
             </div>
           </div>
 
-          <!-- แถว 2: กราฟแท่ง (พร้อมปุ่มเลือกช่วงเวลา) และ แถบคะแนนความพึงพอใจ -->
+          <!-- แถว 2: กราฟวงกลม (พร้อมปุ่มเลือกช่วงเวลา) และ แถบคะแนนความพึงพอใจ -->
           <div class="row g-4 mb-4">
             <!-- ซ้าย: กราฟ -->
             <div class="col-lg-7">
               <div class="card card-stat p-4 h-100">
                 <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
                   <div>
-                    <h6 class="fw-bold text-secondary mb-0"><i class="fa-solid fa-chart-bar"></i> สถิติการให้บริการสำเร็จ</h6>
+                    <h6 class="fw-bold text-secondary mb-0"><i class="fa-solid fa-chart-pie"></i> สถิติการให้บริการสำเร็จ</h6>
                     <small class="text-success fw-bold">ให้บริการแล้ว: <span id="filteredServiceCount" class="fs-5">0</span> ราย</small>
                   </div>
                   <!-- ปุ่มตัวกรองกราฟ -->
@@ -211,14 +211,12 @@
   </div>
 
   <script>
-    // ⚠️ สำคัญมาก: ใส่ API URL ของคุณที่นี่
     const API_URL = "https://script.google.com/macros/s/AKfycbz4HSnOhRCVfUWPA_qH9HiegfwX-R4jK8BIwaEAQFZ7iTImV2CsCmwoKDndseOTz2wp5Q/exec";
     
     let myChart = null;
     let globalData = { appt: [], history: [], dashboard: null };
     let queueDays = [];
 
-    // เปลี่ยนเมนูหน้าหลัก
     function switchMenu(menuId, element) {
       document.querySelectorAll('.section-view').forEach(el => el.classList.remove('active'));
       document.querySelectorAll('.nav-link').forEach(el => el.classList.remove('active'));
@@ -233,7 +231,6 @@
       document.getElementById('pageTitle').innerText = titles[menuId];
     }
 
-    // Tools สำหรับจัดการวันที่
     function getYMD(dateObj) {
       return `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, '0')}-${String(dateObj.getDate()).padStart(2, '0')}`;
     }
@@ -246,7 +243,6 @@
       return new Date(cleanStr); 
     }
 
-    // โหลดข้อมูลหลักทั้งหมด
     async function loadAllData() {
       const btn = document.getElementById("btnRefresh");
       btn.disabled = true; btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> กำลังโหลด...`;
@@ -262,7 +258,7 @@
           globalData = { appt: adminData.appointments, dashboard: adminData.dashboardInfo, history: histData.history };
           
           processDashboardUI();
-          filterChart('day'); // เริ่มต้นวาดกราฟแบบรายวัน
+          filterChart('day'); 
           setupQueueCalendar();
           processFeedbacks(globalData.dashboard.feedbacks);
           
@@ -276,26 +272,19 @@
       }
     }
 
-    // ----------------------------------------------------
-    // ส่วนที่ 1: Dashboard สถิติ
-    // ----------------------------------------------------
     function processDashboardUI() {
       const now = new Date();
       const todayYMD = getYMD(now);
       
-      // คิววันนี้
       const qToday = globalData.appt.filter(a => a.dateRaw && a.dateRaw.includes(todayYMD)).length;
       document.getElementById("statQueueToday").innerText = qToday;
 
-      // จำนวนผู้ใช้งาน (ที่เพิ่มมาใหม่)
       document.getElementById("statUsers").innerText = globalData.dashboard.totalOwners || 0;
 
-      // ปีงบประมาณ (แสดงในปุ่ม Toggle)
       let currentYear = now.getFullYear();
       let displayYearThai = (now.getMonth() >= 9) ? currentYear + 544 : currentYear + 543;
       document.getElementById("fyYearTxt").innerText = `${displayYearThai}`;
 
-      // ผลประเมิน
       const avg = globalData.dashboard.surveyAvg;
       document.getElementById("surveyCount").innerText = globalData.dashboard.surveyCount;
       if(globalData.dashboard.surveyCount > 0) {
@@ -308,7 +297,6 @@
       }
     }
 
-    // ฟังก์ชันกรองกราฟแท่ง
     function filterChart(period) {
       const now = new Date();
       const todayStr = `${String(now.getDate()).padStart(2,'0')}/${String(now.getMonth()+1).padStart(2,'0')}/${now.getFullYear()}`;
@@ -329,8 +317,8 @@
          else { startDate = new Date(now.getFullYear()-1, 9, 1); endDate = new Date(now.getFullYear(), 8, 30, 23, 59, 59); }
       }
 
-      // นับบริการจากประวัติ (History)
-      let serviceStats = { "ฉีดวัคซีน": 0, "ทำหมัน": 0, "ตรวจรักษาโรคทั่วไป": 0, "อื่นๆ": 0 };
+      // นับบริการเป็น ฉีดวัคซีน กับ รับวัคซีนไปฉีดเอง
+      let serviceStats = { "ฉีดวัคซีน": 0, "รับวัคซีนไปฉีดเอง": 0, "อื่นๆ": 0 };
       let totalFiltered = 0;
 
       globalData.history.forEach(h => {
@@ -351,39 +339,30 @@
 
       document.getElementById("filteredServiceCount").innerText = totalFiltered;
 
-      // วาดกราฟแท่ง
+      // วาดกราฟวงกลม (Doughnut)
       const ctx = document.getElementById('serviceChart').getContext('2d');
       if(myChart) myChart.destroy();
       myChart = new Chart(ctx, { 
-        type: 'bar', 
+        type: 'doughnut', 
         data: { 
           labels: Object.keys(serviceStats), 
           datasets: [{ 
-            label: 'จำนวนการให้บริการ (ครั้ง)',
             data: Object.values(serviceStats), 
-            backgroundColor: ['#3498DB', '#E74C3C', '#2ECC71', '#F1C40F'],
-            borderRadius: 6
+            backgroundColor: ['#3498DB', '#2ECC71', '#F1C40F'],
+            borderWidth: 2
           }] 
         }, 
         options: { 
           responsive: true, 
           maintainAspectRatio: false, 
           plugins: { 
-            legend: { display: false } 
+            legend: { position: 'right' } 
           },
-          scales: {
-            y: {
-              beginAtZero: true,
-              ticks: { stepSize: 1 }
-            }
-          }
+          cutout: '65%'
         } 
       });
     }
 
-    // ----------------------------------------------------
-    // ส่วนที่ 2: ปฏิทินคิว 3 วัน
-    // ----------------------------------------------------
     function setupQueueCalendar() {
       const now = new Date();
       const labels = ["วันนี้", "พรุ่งนี้", "มะรืนนี้"];
@@ -449,9 +428,6 @@
       document.getElementById("queueTableBody").innerHTML = html;
     }
 
-    // ----------------------------------------------------
-    // ส่วนที่ 3: ข้อเสนอแนะ
-    // ----------------------------------------------------
     function processFeedbacks(feedbacks) {
       const container = document.getElementById("feedbackContainer");
       container.innerHTML = "";
@@ -482,7 +458,6 @@
       });
     }
 
-    // ยืนยันจบงาน
     function confirmManual(apptId) {
        Swal.fire({ 
          title: 'ยืนยันให้บริการเสร็จสิ้น?', 
