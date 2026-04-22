@@ -75,36 +75,50 @@
         <!-- ================= 1. หน้า Dashboard (สถิติ) ================= -->
         <div id="view-dashboard" class="section-view active">
           
-          <!-- แถว 1: Highlight ตัวเลขสำคัญ -->
+          <!-- แถว 1: Highlight ตัวเลขสำคัญ 3 คอลัมน์ -->
           <div class="row mb-4">
-            <div class="col-md-6">
-              <div class="card card-stat p-4 border-start border-danger border-5 text-center h-100 bg-white d-flex flex-row align-items-center justify-content-center gap-4">
-                <i class="fa-solid fa-clock text-danger opacity-50" style="font-size: 3rem;"></i>
+            <!-- คิวรอวันนี้ -->
+            <div class="col-md-4">
+              <div class="card card-stat p-3 border-start border-danger border-5 text-center h-100 bg-white d-flex flex-row align-items-center justify-content-center gap-3">
+                <i class="fa-solid fa-clock text-danger opacity-50" style="font-size: 2.5rem;"></i>
                 <div class="text-start">
-                  <h6 class="text-muted mb-1">จำนวนคิวรอรับบริการวันนี้</h6>
-                  <h1 class="fw-bold text-danger mb-0" id="statQueueToday">0 <span class="fs-5 fw-normal text-muted">คิว</span></h1>
+                  <h6 class="text-muted mb-1" style="font-size: 0.9rem;">คิวรอรับบริการวันนี้</h6>
+                  <h2 class="fw-bold text-danger mb-0" id="statQueueToday">0 <span class="fs-6 fw-normal text-muted">คิว</span></h2>
                 </div>
               </div>
             </div>
-            <div class="col-md-6">
-              <div class="card card-stat p-4 border-start border-warning border-5 text-center h-100 bg-white d-flex flex-row align-items-center justify-content-center gap-4">
-                <i class="fa-solid fa-star text-warning opacity-50" style="font-size: 3rem;"></i>
+            
+            <!-- ผู้ลงทะเบียนใช้งาน -->
+            <div class="col-md-4">
+              <div class="card card-stat p-3 border-start border-info border-5 text-center h-100 bg-white d-flex flex-row align-items-center justify-content-center gap-3">
+                <i class="fa-solid fa-users text-info opacity-50" style="font-size: 2.5rem;"></i>
                 <div class="text-start">
-                  <h6 class="text-muted mb-1">ความพึงพอใจเฉลี่ยรวม</h6>
-                  <h1 class="fw-bold text-warning mb-0" id="statAvg">0.00 <span class="fs-5 fw-normal text-muted">/ 5.0</span></h1>
+                  <h6 class="text-muted mb-1" style="font-size: 0.9rem;">ผู้ลงทะเบียนใช้งาน</h6>
+                  <h2 class="fw-bold text-info mb-0" id="statUsers">0 <span class="fs-6 fw-normal text-muted">คน</span></h2>
+                </div>
+              </div>
+            </div>
+
+            <!-- ความพึงพอใจ -->
+            <div class="col-md-4">
+              <div class="card card-stat p-3 border-start border-warning border-5 text-center h-100 bg-white d-flex flex-row align-items-center justify-content-center gap-3">
+                <i class="fa-solid fa-star text-warning opacity-50" style="font-size: 2.5rem;"></i>
+                <div class="text-start">
+                  <h6 class="text-muted mb-1" style="font-size: 0.9rem;">ความพึงพอใจเฉลี่ยรวม</h6>
+                  <h2 class="fw-bold text-warning mb-0" id="statAvg">0.00 <span class="fs-6 fw-normal text-muted">/ 5.0</span></h2>
                 </div>
               </div>
             </div>
           </div>
 
-          <!-- แถว 2: กราฟ (พร้อมปุ่มเลือกช่วงเวลา) และ แถบคะแนนความพึงพอใจ -->
+          <!-- แถว 2: กราฟแท่ง (พร้อมปุ่มเลือกช่วงเวลา) และ แถบคะแนนความพึงพอใจ -->
           <div class="row g-4 mb-4">
             <!-- ซ้าย: กราฟ -->
             <div class="col-lg-7">
               <div class="card card-stat p-4 h-100">
                 <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
                   <div>
-                    <h6 class="fw-bold text-secondary mb-0"><i class="fa-solid fa-chart-pie"></i> สถิติการให้บริการสำเร็จ</h6>
+                    <h6 class="fw-bold text-secondary mb-0"><i class="fa-solid fa-chart-bar"></i> สถิติการให้บริการสำเร็จ</h6>
                     <small class="text-success fw-bold">ให้บริการแล้ว: <span id="filteredServiceCount" class="fs-5">0</span> ราย</small>
                   </div>
                   <!-- ปุ่มตัวกรองกราฟ -->
@@ -239,10 +253,8 @@
       document.getElementById("loadingOverlay").style.display = "block";
 
       try {
-        // เพิ่ม redirect: "follow" เพื่อป้องกันปัญหา CORS
         const resAdmin = await fetch(API_URL, { method: "POST", body: JSON.stringify({ action: "getAdminData" }), headers: { "Content-Type": "text/plain;charset=utf-8" }, redirect: "follow" });
         const adminData = await resAdmin.json();
-        
         const resHist = await fetch(API_URL, { method: "POST", body: JSON.stringify({ action: "getHistory" }), headers: { "Content-Type": "text/plain;charset=utf-8" }, redirect: "follow" });
         const histData = await resHist.json();
 
@@ -275,6 +287,9 @@
       const qToday = globalData.appt.filter(a => a.dateRaw && a.dateRaw.includes(todayYMD)).length;
       document.getElementById("statQueueToday").innerText = qToday;
 
+      // จำนวนผู้ใช้งาน (ที่เพิ่มมาใหม่)
+      document.getElementById("statUsers").innerText = globalData.dashboard.totalOwners || 0;
+
       // ปีงบประมาณ (แสดงในปุ่ม Toggle)
       let currentYear = now.getFullYear();
       let displayYearThai = (now.getMonth() >= 9) ? currentYear + 544 : currentYear + 543;
@@ -293,7 +308,7 @@
       }
     }
 
-    // ฟังก์ชันกรองกราฟตามช่วงเวลา
+    // ฟังก์ชันกรองกราฟแท่ง
     function filterChart(period) {
       const now = new Date();
       const todayStr = `${String(now.getDate()).padStart(2,'0')}/${String(now.getMonth()+1).padStart(2,'0')}/${now.getFullYear()}`;
@@ -336,7 +351,7 @@
 
       document.getElementById("filteredServiceCount").innerText = totalFiltered;
 
-      // วาดกราฟ
+      // วาดกราฟแท่ง
       const ctx = document.getElementById('serviceChart').getContext('2d');
       if(myChart) myChart.destroy();
       myChart = new Chart(ctx, { 
@@ -347,21 +362,19 @@
             label: 'จำนวนการให้บริการ (ครั้ง)',
             data: Object.values(serviceStats), 
             backgroundColor: ['#3498DB', '#E74C3C', '#2ECC71', '#F1C40F'],
-            borderRadius: 6 // เพิ่มความโค้งมนให้แท่งกราฟดูสวยขึ้น
+            borderRadius: 6
           }] 
         }, 
         options: { 
           responsive: true, 
           maintainAspectRatio: false, 
           plugins: { 
-            legend: { display: false } // ซ่อนกล่องข้อความด้านบน เพราะเรามีป้ายชื่อที่แกน X แล้ว
+            legend: { display: false } 
           },
           scales: {
             y: {
               beginAtZero: true,
-              ticks: {
-                stepSize: 1 // บังคับให้แกน Y โชว์เป็นจำนวนเต็ม (1, 2, 3...)
-              }
+              ticks: { stepSize: 1 }
             }
           }
         } 
@@ -383,7 +396,6 @@
         };
       });
 
-      // สร้าง Tab
       let tabHtml = "";
       queueDays.forEach((day, idx) => {
         const count = globalData.appt.filter(a => a.dateRaw && a.dateRaw.includes(day.ymd)).length;
@@ -399,11 +411,10 @@
       });
       document.getElementById("calendarTabs").innerHTML = tabHtml;
       
-      selectQueueDay(0); // เลือกวันนี้เป็นค่าเริ่มต้น
+      selectQueueDay(0); 
     }
 
     function selectQueueDay(idx) {
-      // อัปเดต UI แท็บ
       document.querySelectorAll('.day-tab').forEach((el, i) => {
          if(i === idx) el.classList.add('active'); else el.classList.remove('active');
       });
@@ -411,7 +422,6 @@
       const day = queueDays[idx];
       document.getElementById("queueSelectedDateText").innerHTML = `<i class="fa-solid fa-calendar-check text-primary"></i> คิวสำหรับ ${day.title} (${day.dateStr})`;
 
-      // กรองและวาดตาราง
       const dayAppts = globalData.appt.filter(a => a.dateRaw && a.dateRaw.includes(day.ymd));
       let locHome = 0, locCenter = 0;
       let html = "";
@@ -451,7 +461,6 @@
         return;
       }
 
-      // แสดงจากล่าสุดอยู่บนสุด
       [...feedbacks].reverse().forEach((fb, index) => {
         container.innerHTML += `
           <div class="col-md-6 col-lg-4">
@@ -487,16 +496,13 @@
           if(res.isConfirmed) {
             Swal.fire({ title: 'กำลังบันทึก...', allowOutsideClick: false, showConfirmButton: false, willOpen: () => { Swal.showLoading() } });
             try {
-              // เพิ่ม redirect: "follow" ที่นี่ด้วย
               const req = await fetch(API_URL, { method: "POST", body: JSON.stringify({ action: "confirmService", apptId: apptId }), headers: { "Content-Type": "text/plain;charset=utf-8" }, redirect: "follow" });
               const result = await req.json();
               if(result.status === "success") {
                 Swal.fire('สำเร็จ', 'ตัดคิวและบันทึกประวัติเรียบร้อย', 'success');
                 loadAllData();
               }
-            } catch(e) {
-              Swal.fire('ข้อผิดพลาด', 'ไม่สามารถบันทึกข้อมูลได้', 'error');
-            }
+            } catch(e) {}
           }
        });
     }
